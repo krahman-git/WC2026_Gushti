@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>⚽ World Cup 2026 — 5C'96 Prediction Game</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  :root {
+    --navy:#0a1628; --navy2:#0e2040; --navy3:#152b55;
+    --gold:#c9a227; --gold2:#f0c040; --red:#c0392b;
+    --white:#f5f5f5; --grey:#8899aa; --grey2:#1e2f45;
+    --green:#27ae60; --amber:#e67e22;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--navy);color:var(--white);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+  ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:var(--navy2)} ::-webkit-scrollbar-thumb{background:var(--navy3);border-radius:3px}
+  .btn{cursor:pointer;border:none;border-radius:8px;font-weight:600;transition:all .2s}
+  .btn-gold{background:var(--gold);color:var(--navy);padding:8px 16px}
+  .btn-gold:hover{background:var(--gold2)}
+  .btn-red{background:var(--red);color:#fff;padding:8px 16px}
+  .btn-ghost{background:transparent;border:1px solid var(--navy3);color:var(--grey);padding:6px 12px}
+  .btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+  input[type=number]{background:var(--navy2);border:2px solid var(--navy3);color:var(--white);border-radius:8px;padding:8px;font-size:1.2rem;font-weight:700;text-align:center;width:52px;-moz-appearance:textfield}
+  input[type=number]::-webkit-inner-spin-button{display:none}
+  input[type=number]:focus{outline:none;border-color:var(--gold)}
+  input[type=number]:disabled{opacity:.5;cursor:not-allowed}
+  input[type=text],input[type=password]{background:var(--navy2);border:1.5px solid var(--navy3);color:var(--white);border-radius:8px;padding:10px 14px;width:100%}
+  input[type=text]:focus,input[type=password]:focus{outline:none;border-color:var(--gold)}
+  .badge{display:inline-block;border-radius:99px;padding:2px 8px;font-size:.7rem;font-weight:700;letter-spacing:.05em}
+  .badge-gold{background:var(--gold);color:var(--navy)}
+  .badge-green{background:var(--green);color:#fff}
+  .badge-red{background:var(--red);color:#fff}
+  .badge-grey{background:var(--grey2);color:var(--grey)}
+  .badge-amber{background:var(--amber);color:#fff}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
+  .modal{background:var(--navy2);border:1px solid var(--navy3);border-radius:16px;padding:24px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto}
+  .pulse{animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+  .slide-down{animation:slideDown .3s ease}
+  @keyframes pop{0%{transform:scale(.95)}70%{transform:scale(1.05)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+// ═══════════════════════════════════════════════════════════════
+// CONFIG — fill in your Apps Script Web App URL after deploying
+// ═══════════════════════════════════════════════════════════════
+const CONFIG = {
+  appsScriptUrl: 'https://script.google.com/macros/s/AKfycbzRx8woRJ-v-xPiR5rBU2uwJjHCksNh46GUmwoyMrWVYnpUV1WX6rhE1AIQeBTddUR16g/exec',  // paste deployed URL
+  adminPin: '2026',          // change to match ADMIN_PIN in apps-script.gs
+  refreshInterval: 60000,   // auto-refresh every 60 seconds
+  timezone: 'America/Chicago',
+};
+
+// ═══════════════════════════════════════════════════════════════
+// PLAYERS
+// ═══════════════════════════════════════════════════════════════
+const PLAYERS = [
+  { name:'Kazi',  avatar:'https://drive.google.com/thumbnail?id=1_Z6cC4djMb3ox46Ic3aev7cz_p1G0b1p&sz=w300' },
+  { name:'Voon',  avatar:'https://drive.google.com/thumbnail?id=1gkLLTdM8ocCl9LqEUzUevOUPh-0XdVsJ&sz=w300' },
+  { name:'Meng',  avatar:'https://drive.google.com/thumbnail?id=1XjFzvaFTCMAIGrS-iGpoDD0o9aFnUnZj&sz=w300' },
+  { name:'Hao',   avatar:'https://drive.google.com/thumbnail?id=19RDk4_PRY0P8IHBxE7taOMur7zMtdI0a&sz=w300' },
+  { name:'Jeff',  avatar:'https://drive.google.com/thumbnail?id=1nxcQorVO45o2aIExMGP53cSsbzMGUBES&sz=w300' },
+  { name:'Abby',  avatar:'https://drive.google.com/thumbnail?id=1VOYJP67JEFPcPIS_CgIiQNmdn_v-CBIT&sz=w300' },  //   upload Abby's avatar to Drive then paste her file ID here
+  { name:'Pal',   avatar:'https://drive.google.com/thumbnail?id=17hkVgHVF5knZuaPT2zMm684RQN1UGcJA&sz=w300' },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// FLAGS
+// ═══════════════════════════════════════════════════════════════
+const FLAG_CODES = {
+  'Mexico':'mx','South Africa':'za','South Korea':'kr','Czechia':'cz',
+  'Canada':'ca','Bosnia & Herzegovina':'ba','Qatar':'qa','Switzerland':'ch',
+  'Brazil':'br','Morocco':'ma','Haiti':'ht','Scotland':'gb-sct',
+  'USA':'us','Paraguay':'py','Australia':'au','Turkey':'tr',
+  'Germany':'de','Curaçao':'cw','Ivory Coast':'ci','Ecuador':'ec',
+  'Netherlands':'nl','Japan':'jp','Sweden':'se','Tunisia':'tn',
+  'Spain':'es','Cape Verde':'cv','Saudi Arabia':'sa','Uruguay':'uy',
+  'Belgium':'be','Egypt':'eg','Iran':'ir','New Zealand':'nz',
+  'France':'fr','Senegal':'sn','Iraq':'iq','Norway':'no',
+  'Argentina':'ar','Algeria':'dz','Austria':'at','Jordan':'jo',
+  'Portugal':'pt','DR Congo':'cd','Uzbekistan':'uz','Colombia':'co',
+  'England':'gb-eng','Croatia':'hr','Ghana':'gh','Panama':'pa',
+};
+const flag = (t, size=32) => {
+  const code = FLAG_CODES[t];
+  if (!code) return <span style={{fontSize:'1.2rem'}}>🏳</span>;
+  return <img src={`https://flagcdn.com/w40/${code}.png`} alt={t} style={{width:size,height:'auto',borderRadius:2,verticalAlign:'middle',display:'inline-block'}} />;
+};
+
+// ═══════════════════════════════════════════════════════════════
+// MATCH SCHEDULE — all 104 matches, UTC times
+// ═══════════════════════════════════════════════════════════════
+const MATCHES = [
+  // ── GROUP STAGE ─────────────────────────────────────────────
+  // GROUP A
+  {id:1, group:'A', stage:'group', home:'Mexico',       away:'South Africa',      utc:'2026-06-11T19:00:00Z', venue:'Mexico City'},
+  {id:2, group:'A', stage:'group', home:'South Korea',  away:'Czechia',            utc:'2026-06-12T02:00:00Z', venue:'Zapopan'},
+  {id:25,group:'A', stage:'group', home:'Czechia',      away:'South Africa',       utc:'2026-06-18T16:00:00Z', venue:'Atlanta'},
+  {id:28,group:'A', stage:'group', home:'Mexico',       away:'South Korea',        utc:'2026-06-19T01:00:00Z', venue:'Zapopan'},
+  {id:53,group:'A', stage:'group', home:'South Africa', away:'South Korea',        utc:'2026-06-25T01:00:00Z', venue:'Zapopan'},
+  {id:54,group:'A', stage:'group', home:'Czechia',      away:'Mexico',             utc:'2026-06-25T01:00:00Z', venue:'Mexico City'},
+  // GROUP B
+  {id:3, group:'B', stage:'group', home:'Canada',       away:'Bosnia & Herzegovina',utc:'2026-06-12T19:00:00Z', venue:'Toronto'},
+  {id:5, group:'B', stage:'group', home:'Qatar',        away:'Switzerland',         utc:'2026-06-13T19:00:00Z', venue:'Santa Clara'},
+  {id:26,group:'B', stage:'group', home:'Switzerland',  away:'Bosnia & Herzegovina',utc:'2026-06-18T19:00:00Z', venue:'Los Angeles'},
+  {id:27,group:'B', stage:'group', home:'Canada',       away:'Qatar',               utc:'2026-06-18T22:00:00Z', venue:'Vancouver'},
+  {id:49,group:'B', stage:'group', home:'Switzerland',  away:'Canada',              utc:'2026-06-24T19:00:00Z', venue:'Vancouver'},
+  {id:50,group:'B', stage:'group', home:'Bosnia & Herzegovina',away:'Qatar',        utc:'2026-06-24T19:00:00Z', venue:'Seattle'},
+  // GROUP C
+  {id:6, group:'C', stage:'group', home:'Brazil',       away:'Morocco',            utc:'2026-06-13T22:00:00Z', venue:'New Jersey'},
+  {id:7, group:'C', stage:'group', home:'Haiti',        away:'Scotland',            utc:'2026-06-14T01:00:00Z', venue:'Foxborough'},
+  {id:30,group:'C', stage:'group', home:'Scotland',     away:'Morocco',             utc:'2026-06-19T22:00:00Z', venue:'Foxborough'},
+  {id:31,group:'C', stage:'group', home:'Brazil',       away:'Haiti',               utc:'2026-06-20T00:30:00Z', venue:'Philadelphia'},
+  {id:51,group:'C', stage:'group', home:'Morocco',      away:'Haiti',               utc:'2026-06-24T22:00:00Z', venue:'Atlanta'},
+  {id:52,group:'C', stage:'group', home:'Scotland',     away:'Brazil',              utc:'2026-06-24T22:00:00Z', venue:'Miami'},
+  // GROUP D
+  {id:4, group:'D', stage:'group', home:'USA',          away:'Paraguay',            utc:'2026-06-13T01:00:00Z', venue:'Los Angeles'},
+  {id:8, group:'D', stage:'group', home:'Australia',    away:'Turkey',              utc:'2026-06-14T04:00:00Z', venue:'Vancouver'},
+  {id:29,group:'D', stage:'group', home:'USA',          away:'Australia',           utc:'2026-06-19T19:00:00Z', venue:'Seattle'},
+  {id:32,group:'D', stage:'group', home:'Turkey',       away:'Paraguay',            utc:'2026-06-20T03:00:00Z', venue:'Santa Clara'},
+  {id:59,group:'D', stage:'group', home:'Turkey',       away:'USA',                 utc:'2026-06-26T02:00:00Z', venue:'Los Angeles'},
+  {id:60,group:'D', stage:'group', home:'Paraguay',     away:'Australia',           utc:'2026-06-26T02:00:00Z', venue:'Santa Clara'},
+  // GROUP E
+  {id:9, group:'E', stage:'group', home:'Germany',      away:'Curaçao',             utc:'2026-06-14T17:00:00Z', venue:'Houston'},
+  {id:11,group:'E', stage:'group', home:'Ivory Coast',  away:'Ecuador',             utc:'2026-06-14T23:00:00Z', venue:'Philadelphia'},
+  {id:34,group:'E', stage:'group', home:'Germany',      away:'Ivory Coast',         utc:'2026-06-20T20:00:00Z', venue:'Toronto'},
+  {id:35,group:'E', stage:'group', home:'Ecuador',      away:'Curaçao',             utc:'2026-06-21T00:00:00Z', venue:'Kansas City'},
+  {id:55,group:'E', stage:'group', home:'Curaçao',      away:'Ivory Coast',         utc:'2026-06-25T20:00:00Z', venue:'Philadelphia'},
+  {id:56,group:'E', stage:'group', home:'Ecuador',      away:'Germany',             utc:'2026-06-25T20:00:00Z', venue:'New Jersey'},
+  // GROUP F
+  {id:10,group:'F', stage:'group', home:'Netherlands',  away:'Japan',               utc:'2026-06-14T20:00:00Z', venue:'Arlington'},
+  {id:12,group:'F', stage:'group', home:'Sweden',       away:'Tunisia',             utc:'2026-06-15T02:00:00Z', venue:'Zapopan'},
+  {id:33,group:'F', stage:'group', home:'Netherlands',  away:'Sweden',              utc:'2026-06-20T17:00:00Z', venue:'Houston'},
+  {id:36,group:'F', stage:'group', home:'Tunisia',      away:'Japan',               utc:'2026-06-21T04:00:00Z', venue:'Zapopan'},
+  {id:57,group:'F', stage:'group', home:'Tunisia',      away:'Netherlands',         utc:'2026-06-25T23:00:00Z', venue:'Kansas City'},
+  {id:58,group:'F', stage:'group', home:'Japan',        away:'Sweden',              utc:'2026-06-25T23:00:00Z', venue:'Arlington'},
+  // GROUP G
+  {id:14,group:'G', stage:'group', home:'Belgium',      away:'Egypt',               utc:'2026-06-15T19:00:00Z', venue:'Seattle'},
+  {id:16,group:'G', stage:'group', home:'Iran',         away:'New Zealand',         utc:'2026-06-16T01:00:00Z', venue:'Los Angeles'},
+  {id:38,group:'G', stage:'group', home:'Belgium',      away:'Iran',                utc:'2026-06-21T19:00:00Z', venue:'Los Angeles'},
+  {id:40,group:'G', stage:'group', home:'New Zealand',  away:'Egypt',               utc:'2026-06-22T01:00:00Z', venue:'Vancouver'},
+  {id:65,group:'G', stage:'group', home:'New Zealand',  away:'Belgium',             utc:'2026-06-27T03:00:00Z', venue:'Vancouver'},
+  {id:66,group:'G', stage:'group', home:'Egypt',        away:'Iran',                utc:'2026-06-27T03:00:00Z', venue:'Seattle'},
+  // GROUP H
+  {id:13,group:'H', stage:'group', home:'Spain',        away:'Cape Verde',          utc:'2026-06-15T16:00:00Z', venue:'Atlanta'},
+  {id:15,group:'H', stage:'group', home:'Saudi Arabia', away:'Uruguay',             utc:'2026-06-15T22:00:00Z', venue:'Miami'},
+  {id:37,group:'H', stage:'group', home:'Spain',        away:'Saudi Arabia',        utc:'2026-06-21T16:00:00Z', venue:'Atlanta'},
+  {id:39,group:'H', stage:'group', home:'Uruguay',      away:'Cape Verde',          utc:'2026-06-21T22:00:00Z', venue:'Miami'},
+  {id:63,group:'H', stage:'group', home:'Cape Verde',   away:'Saudi Arabia',        utc:'2026-06-27T00:00:00Z', venue:'Houston'},
+  {id:64,group:'H', stage:'group', home:'Uruguay',      away:'Spain',               utc:'2026-06-27T00:00:00Z', venue:'Zapopan'},
+  // GROUP I
+  {id:17,group:'I', stage:'group', home:'France',       away:'Senegal',             utc:'2026-06-16T19:00:00Z', venue:'New Jersey'},
+  {id:18,group:'I', stage:'group', home:'Iraq',         away:'Norway',              utc:'2026-06-16T22:00:00Z', venue:'Foxborough'},
+  {id:42,group:'I', stage:'group', home:'France',       away:'Iraq',                utc:'2026-06-22T21:00:00Z', venue:'Philadelphia'},
+  {id:43,group:'I', stage:'group', home:'Norway',       away:'Senegal',             utc:'2026-06-23T00:00:00Z', venue:'Toronto'},
+  {id:61,group:'I', stage:'group', home:'Norway',       away:'France',              utc:'2026-06-26T19:00:00Z', venue:'Foxborough'},
+  {id:62,group:'I', stage:'group', home:'Senegal',      away:'Iraq',                utc:'2026-06-26T19:00:00Z', venue:'Toronto'},
+  // GROUP J
+  {id:19,group:'J', stage:'group', home:'Argentina',    away:'Algeria',             utc:'2026-06-17T01:00:00Z', venue:'Kansas City'},
+  {id:20,group:'J', stage:'group', home:'Austria',      away:'Jordan',              utc:'2026-06-17T04:00:00Z', venue:'Santa Clara'},
+  {id:41,group:'J', stage:'group', home:'Argentina',    away:'Austria',             utc:'2026-06-22T17:00:00Z', venue:'Arlington'},
+  {id:44,group:'J', stage:'group', home:'Jordan',       away:'Algeria',             utc:'2026-06-23T03:00:00Z', venue:'Santa Clara'},
+  {id:71,group:'J', stage:'group', home:'Algeria',      away:'Austria',             utc:'2026-06-28T02:00:00Z', venue:'Kansas City'},
+  {id:72,group:'J', stage:'group', home:'Jordan',       away:'Argentina',           utc:'2026-06-28T02:00:00Z', venue:'Arlington'},
+  // GROUP K
+  {id:21,group:'K', stage:'group', home:'Portugal',     away:'DR Congo',            utc:'2026-06-17T17:00:00Z', venue:'Houston'},
+  {id:24,group:'K', stage:'group', home:'Uzbekistan',   away:'Colombia',            utc:'2026-06-18T02:00:00Z', venue:'Mexico City'},
+  {id:45,group:'K', stage:'group', home:'Portugal',     away:'Uzbekistan',          utc:'2026-06-23T17:00:00Z', venue:'Houston'},
+  {id:48,group:'K', stage:'group', home:'Colombia',     away:'DR Congo',            utc:'2026-06-24T02:00:00Z', venue:'Zapopan'},
+  {id:69,group:'K', stage:'group', home:'Colombia',     away:'Portugal',            utc:'2026-06-27T23:30:00Z', venue:'Miami'},
+  {id:70,group:'K', stage:'group', home:'DR Congo',     away:'Uzbekistan',          utc:'2026-06-27T23:30:00Z', venue:'Atlanta'},
+  // GROUP L
+  {id:22,group:'L', stage:'group', home:'England',      away:'Croatia',             utc:'2026-06-17T20:00:00Z', venue:'Arlington'},
+  {id:23,group:'L', stage:'group', home:'Ghana',        away:'Panama',              utc:'2026-06-17T23:00:00Z', venue:'Toronto'},
+  {id:46,group:'L', stage:'group', home:'England',      away:'Ghana',               utc:'2026-06-23T20:00:00Z', venue:'Foxborough'},
+  {id:47,group:'L', stage:'group', home:'Panama',       away:'Croatia',             utc:'2026-06-23T23:00:00Z', venue:'Foxborough'},
+  {id:67,group:'L', stage:'group', home:'Panama',       away:'England',             utc:'2026-06-27T21:00:00Z', venue:'New Jersey'},
+  {id:68,group:'L', stage:'group', home:'Croatia',      away:'Ghana',               utc:'2026-06-27T21:00:00Z', venue:'Philadelphia'},
+  // ── ROUND OF 32 ─────────────────────────────────────────────
+  {id:73, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 73', utc:'2026-06-28T19:00:00Z', venue:'Los Angeles'},
+  {id:74, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 74', utc:'2026-06-29T17:00:00Z', venue:'Houston'},
+  {id:75, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 75', utc:'2026-06-29T20:30:00Z', venue:'Foxborough'},
+  {id:76, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 76', utc:'2026-06-30T01:00:00Z', venue:'Zapopan'},
+  {id:77, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 77', utc:'2026-06-30T17:00:00Z', venue:'Arlington'},
+  {id:78, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 78', utc:'2026-06-30T21:00:00Z', venue:'New Jersey'},
+  {id:79, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 79', utc:'2026-07-01T01:00:00Z', venue:'Mexico City'},
+  {id:80, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 80', utc:'2026-07-01T16:00:00Z', venue:'Atlanta'},
+  {id:81, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 81', utc:'2026-07-01T20:00:00Z', venue:'Seattle'},
+  {id:82, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 82', utc:'2026-07-02T00:00:00Z', venue:'Santa Clara'},
+  {id:83, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 83', utc:'2026-07-02T19:00:00Z', venue:'Los Angeles'},
+  {id:84, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 84', utc:'2026-07-02T23:00:00Z', venue:'Toronto'},
+  {id:85, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 85', utc:'2026-07-03T03:00:00Z', venue:'Vancouver'},
+  {id:86, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 86', utc:'2026-07-03T18:00:00Z', venue:'Arlington'},
+  {id:87, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 87', utc:'2026-07-03T22:00:00Z', venue:'Miami'},
+  {id:88, group:'', stage:'r32', home:'TBD', away:'TBD', label:'R32 Match 88', utc:'2026-07-04T01:30:00Z', venue:'Kansas City'},
+  // ── ROUND OF 16 ─────────────────────────────────────────────
+  {id:89, group:'', stage:'r16', home:'TBD', away:'TBD', label:'R16 Match 89', utc:'2026-07-04T17:00:00Z', venue:'Houston'},
+  {id:90, group:'', stage:'r16', home:'TBD', away:'TBD', label:'R16 Match 90', utc:'2026-07-04T21:00:00Z', venue:'Philadelphia'},
+  {id:91, group:'', stage:'r16', home:'TBD', away:'TBD', label:'R16 Match 91', utc:'2026-07-05T20:00:00Z', venue:'New Jersey'},
+  {id:92, group:'', stage:'r16', home:'TBD', away:'TBD', label:'R16 Match 92', utc:'2026-07-06T00:00:00Z', venue:'Mexico City'},
+  {id:93, group:'', stage:'r16', home:'TBD', away:'TBD', label:'R16 Match 93', utc:'2026-07-06T19:00:00Z', venue:'Arlington'},
+  {id:94, group:'', stage:'r16', home:'TBD', away:'TBD', label:'R16 Match 94', utc:'2026-07-07T00:00:00Z', venue:'Seattle'},
+  {id:95, group:'', stage:'r16', home:'TBD', away:'TBD', label:'R16 Match 95', utc:'2026-07-07T16:00:00Z', venue:'Atlanta'},
+  {id:96, group:'', stage:'r16', home:'TBD', away:'TBD', label:'R16 Match 96', utc:'2026-07-07T20:00:00Z', venue:'Vancouver'},
+  // ── QUARTER-FINALS ──────────────────────────────────────────
+  {id:97, group:'', stage:'qf', home:'TBD', away:'TBD', label:'Quarter-Final 1', utc:'2026-07-09T20:00:00Z', venue:'Foxborough'},
+  {id:98, group:'', stage:'qf', home:'TBD', away:'TBD', label:'Quarter-Final 2', utc:'2026-07-10T19:00:00Z', venue:'Los Angeles'},
+  {id:99, group:'', stage:'qf', home:'TBD', away:'TBD', label:'Quarter-Final 3', utc:'2026-07-11T21:00:00Z', venue:'Miami'},
+  {id:100,group:'', stage:'qf', home:'TBD', away:'TBD', label:'Quarter-Final 4', utc:'2026-07-12T01:00:00Z', venue:'Kansas City'},
+  // ── SEMI-FINALS ─────────────────────────────────────────────
+  {id:101,group:'', stage:'sf', home:'TBD', away:'TBD', label:'Semi-Final 1', utc:'2026-07-14T19:00:00Z', venue:'Arlington'},
+  {id:102,group:'', stage:'sf', home:'TBD', away:'TBD', label:'Semi-Final 2', utc:'2026-07-15T19:00:00Z', venue:'Atlanta'},
+  // ── THIRD PLACE & FINAL ─────────────────────────────────────
+  {id:103,group:'', stage:'3rd', home:'TBD', away:'TBD', label:'Third Place Play-off', utc:'2026-07-18T21:00:00Z', venue:'Miami'},
+  {id:104,group:'', stage:'final', home:'TBD', away:'TBD', label:'🏆 THE FINAL', utc:'2026-07-19T19:00:00Z', venue:'New Jersey'},
+];
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+const fmt = (utc) => new Date(utc).toLocaleString('en-US',{
+  timeZone:CONFIG.timezone, weekday:'short', month:'short', day:'numeric',
+  hour:'numeric', minute:'2-digit', hour12:true
+});
+const fmtShort = (utc) => new Date(utc).toLocaleString('en-US',{
+  timeZone:CONFIG.timezone, month:'short', day:'numeric',
+  hour:'numeric', minute:'2-digit', hour12:true
+});
+const hoursUntil = (utc) => (new Date(utc) - new Date()) / 36e5;
+const isLocked  = (utc) => hoursUntil(utc) < 5;
+const isStarted = (utc) => hoursUntil(utc) < 0;
+
+const stageLabel = s => ({
+  group:'Group Stage', r32:'Round of 32', r16:'Round of 16',
+  qf:'Quarter-Finals', sf:'Semi-Finals', '3rd':'3rd Place Play-off', final:'Final'
+}[s] || s);
+
+// Pre-computed O(1) lookups — built once at module load
+const MATCH_BY_ID = Object.fromEntries(MATCHES.map(m => [m.id, m]));
+const MATCH_TIME  = Object.fromEntries(MATCHES.map(m => [m.id, fmtShort(m.utc)]));
+
+function calcPoints(pred, actual) {
+  if (!pred || actual.home == null || actual.away == null) return null;
+  const predOut  = Math.sign(pred.home - pred.away);
+  const actOut   = Math.sign(actual.home - actual.away);
+  if (predOut !== actOut) return 0;
+  return (pred.home === actual.home && pred.away === actual.away) ? 5 : 3;
+}
+
+function buildLeaderboard(predictions, scores) {
+  return PLAYERS.map(p => {
+    let total=0, outcomes=0, perfects=0, played=0;
+    const detail = {};
+    MATCHES.forEach(m => {
+      const sc = scores[m.id];
+      if (!sc || sc.home == null) return;
+      played++;
+      const pred = predictions[m.id]?.[p.name];
+      const pts  = calcPoints(pred, sc);
+      if (pts != null) {
+        total += pts;
+        if (pts >= 3) outcomes++;
+        if (pts === 5) perfects++;
+      }
+      detail[m.id] = { pts, pred, actual: sc };
+    });
+    return { ...p, total, outcomes, perfects, played, detail };
+  }).sort((a,b) => b.total - a.total || b.perfects - a.perfects);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// API
+// ═══════════════════════════════════════════════════════════════
+async function apiFetch(action) {
+  const r = await fetch(`${CONFIG.appsScriptUrl}?action=${action}`);
+  return r.json();
+}
+async function apiPost(body) {
+  try {
+    await fetch(CONFIG.appsScriptUrl, {
+      method:'POST',
+      mode:'no-cors',
+      body: JSON.stringify(body)
+    });
+  } catch(e) {
+    console.warn('apiPost error:', e);
+  }
+}
+
+function parsePredictions(rows) {
+  const out = {};
+  rows.forEach(r => {
+    const mid = parseInt(r.MatchID);
+    if (!out[mid]) out[mid] = {};
+    out[mid][r.PlayerName] = { home: parseInt(r.HomeGoals), away: parseInt(r.AwayGoals) };
+  });
+  return out;
+}
+function parseScores(rows) {
+  const out = {};
+  rows.forEach(r => { out[parseInt(r.MatchID)] = { home: parseInt(r.HomeGoals), away: parseInt(r.AwayGoals), status: r.Status }; });
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COMPONENTS
+// ═══════════════════════════════════════════════════════════════
+
+function Avatar({ player, size=56, selected, onClick }) {
+  const s = { width:size, height:size, borderRadius:'50%', objectFit:'cover',
+    border: selected ? '3px solid var(--gold)' : '3px solid var(--navy3)',
+    cursor: onClick ? 'pointer' : 'default',
+    background: 'var(--navy2)', transition:'border-color .2s' };
+  return player.avatar
+    ? <img src={player.avatar} style={s} alt={player.name} onClick={onClick}
+        onError={e=>{e.target.style.display='none';e.target.nextSibling.style.display='flex'}}/>
+    : null;
+}
+
+function AvatarPlaceholder({ player, size=56, selected, onClick }) {
+  const s = {
+    width:size, height:size, borderRadius:'50%',
+    background: selected ? 'var(--gold)' : 'var(--navy3)',
+    display:'flex', alignItems:'center', justifyContent:'center',
+    cursor: onClick ? 'pointer' : 'default',
+    fontSize: size * .4, fontWeight:700, color: selected ? 'var(--navy)' : 'var(--white)',
+    border: selected ? '3px solid var(--gold2)' : '3px solid var(--navy3)',
+    transition:'all .2s', flexShrink:0
+  };
+  return <div style={s} onClick={onClick}>{player.name[0]}</div>;
+}
+
+const PlayerAvatar = React.memo(function PlayerAvatar({ player, size=56, selected, onClick }) {
+  const [err, setErr] = React.useState(false);
+  if (!player.avatar || err)
+    return <AvatarPlaceholder player={player} size={size} selected={selected} onClick={onClick}/>;
+  const s = { width:size, height:size, borderRadius:'50%', objectFit:'cover',
+    border: selected ? '3px solid var(--gold)' : '3px solid var(--navy3)',
+    cursor: onClick ? 'pointer' : 'default', transition:'border-color .2s', flexShrink:0 };
+  return <img src={player.avatar} style={s} alt={player.name} onClick={onClick} onError={()=>setErr(true)}/>;
+});
+
+const ScoreBadge = React.memo(function ScoreBadge({ pts }) {
+  if (pts == null) return null;
+  if (pts === 5) return <span className="badge badge-gold">🌟 +5</span>;
+  if (pts === 3) return <span className="badge badge-green">✅ +3</span>;
+  return <span className="badge badge-red">❌ 0</span>;
+});
+
+// ── MATCH CARD ────────────────────────────────────────────────
+const MatchCard = React.memo(function MatchCard({ match, matchPredictions, matchScore, currentPlayer, onSave }) {
+  const sc = matchScore;
+  const locked   = isLocked(match.utc);
+  const started  = isStarted(match.utc);
+  const finished = sc?.status === 'FINISHED';
+  const myPred   = matchPredictions?.[currentPlayer] || {};
+  const [homeVal, setHomeVal] = React.useState(myPred.home ?? '');
+  const [awayVal, setAwayVal] = React.useState(myPred.away ?? '');
+  const [saving,  setSaving]  = React.useState(false);
+  const [saved,   setSaved]   = React.useState(false);
+
+  React.useEffect(()=>{
+    const p = matchPredictions?.[currentPlayer];
+    if (p) { setHomeVal(p.home); setAwayVal(p.away); }
+    else { setHomeVal(''); setAwayVal(''); }
+  }, [matchPredictions, currentPlayer]);
+
+  const save = async () => {
+    if (homeVal === '' || awayVal === '') return;
+    setSaving(true);
+    await onSave(match.id, parseInt(homeVal), parseInt(awayVal));
+    setSaving(false); setSaved(true);
+    setTimeout(()=>setSaved(false), 2000);
+  };
+
+  const isTBD = match.home === 'TBD';
+
+  return (
+    <div style={{background:'var(--navy2)',borderRadius:12,padding:'16px',marginBottom:12,
+      border: finished ? '1px solid var(--green)' : started ? '1px solid var(--amber)' : '1px solid var(--navy3)',
+      animation: finished ? 'none' : undefined}}>
+      {/* Match Header */}
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:12}}>
+        <div>
+          {match.group && <span style={{fontSize:'.72rem',color:'var(--gold)',fontWeight:700,letterSpacing:'.05em'}}>GROUP {match.group}</span>}
+          {match.label && <span style={{fontSize:'.72rem',color:'var(--gold)',fontWeight:700}}>{match.label}</span>}
+          <div style={{fontSize:'.78rem',color:'var(--grey)',marginTop:2}}>{MATCH_TIME[match.id]} CST · {match.venue}</div>
+        </div>
+        <div style={{textAlign:'right'}}>
+          {finished && <span className="badge badge-green">FINAL</span>}
+          {started && !finished && <span className="badge badge-amber pulse">LIVE</span>}
+          {locked && !started && <span className="badge badge-grey">🔒 Locked</span>}
+          {!locked && !started && <span style={{fontSize:'.7rem',color:'var(--grey)'}}>
+            Locks in {Math.max(0,Math.floor(hoursUntil(match.utc)))}h
+          </span>}
+        </div>
+      </div>
+
+      {/* Teams */}
+      <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
+        <div style={{flex:1,textAlign:'right'}}>
+          <div style={{fontSize:'1.5rem'}}>{isTBD ? '🏳' : flag(match.home)}</div>
+          <div style={{fontWeight:700,fontSize:'.9rem'}}>{match.home}</div>
+        </div>
+        {/* Actual score or VS */}
+        {finished ? (
+          <div style={{textAlign:'center',background:'var(--navy3)',borderRadius:8,padding:'6px 16px',minWidth:80}}>
+            <div style={{fontSize:'1.5rem',fontWeight:800,letterSpacing:2}}>{sc.home} – {sc.away}</div>
+            <div style={{fontSize:'.68rem',color:'var(--grey)'}}>FULL TIME</div>
+          </div>
+        ) : started ? (
+          <div style={{textAlign:'center',background:'var(--amber)',borderRadius:8,padding:'6px 16px',minWidth:80}}>
+            <div style={{fontSize:'1.5rem',fontWeight:800,color:'var(--navy)'}}>LIVE</div>
+          </div>
+        ) : (
+          <div style={{textAlign:'center',color:'var(--grey)',fontWeight:700,minWidth:40}}>VS</div>
+        )}
+        <div style={{flex:1,textAlign:'left'}}>
+          <div style={{fontSize:'1.5rem'}}>{isTBD ? '🏳' : flag(match.away)}</div>
+          <div style={{fontWeight:700,fontSize:'.9rem'}}>{match.away}</div>
+        </div>
+      </div>
+
+      {/* Prediction Grid */}
+      <div style={{overflowX:'auto'}}>
+        <table style={{width:'100%',borderCollapse:'collapse',minWidth:420}}>
+          <thead>
+            <tr>
+              <td style={{width:80}}></td>
+              {PLAYERS.map(p=>(
+                <td key={p.name} style={{textAlign:'center',padding:'4px 6px'}}>
+                  <PlayerAvatar player={p} size={32}/>
+                  <div style={{fontSize:'.65rem',color:p.name===currentPlayer?'var(--gold)':'var(--grey)',marginTop:2,fontWeight:p.name===currentPlayer?700:400}}>
+                    {p.name}
+                  </div>
+                </td>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style={{fontSize:'.72rem',color:'var(--grey)',paddingRight:8}}>Prediction</td>
+              {PLAYERS.map(p=>{
+                const pred = matchPredictions?.[p.name];
+                const pts  = finished ? calcPoints(pred, sc) : null;
+                const isMe = p.name === currentPlayer;
+                return (
+                  <td key={p.name} style={{textAlign:'center',padding:'4px 6px'}}>
+                    {isMe && !locked ? (
+                      <div style={{display:'flex',alignItems:'center',gap:4,justifyContent:'center'}}>
+                        <input type="number" min="0" max="20" value={homeVal}
+                          onChange={e=>setHomeVal(e.target.value)} style={{width:40,padding:'4px'}}/>
+                        <span style={{color:'var(--grey)'}}>–</span>
+                        <input type="number" min="0" max="20" value={awayVal}
+                          onChange={e=>setAwayVal(e.target.value)} style={{width:40,padding:'4px'}}/>
+                      </div>
+                    ) : pred ? (
+                      <div>
+                        <span style={{fontWeight:700,color:pts===5?'var(--gold)':pts===3?'var(--green)':pts===0?'var(--red)':'var(--white)'}}>
+                          {pred.home}–{pred.away}
+                        </span>
+                        {pts != null && <div style={{marginTop:2}}><ScoreBadge pts={pts}/></div>}
+                      </div>
+                    ) : (
+                      <span style={{color:'var(--navy3)',fontSize:'.8rem'}}>—</span>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Save button */}
+      {!locked && (
+        <div style={{marginTop:12,textAlign:'right'}}>
+          <button className="btn btn-gold" onClick={save} disabled={saving||homeVal===''||awayVal===''}>
+            {saving ? '…' : saved ? '✓ Saved!' : 'Save Prediction'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+});
+
+// ── LEADERBOARD ───────────────────────────────────────────────
+function Leaderboard({ predictions, scores }) {
+  const lb = React.useMemo(() => buildLeaderboard(predictions, scores), [predictions, scores]);
+  const [expanded, setExpanded] = React.useState(null);
+  const finishedCount = React.useMemo(() => MATCHES.filter(m => scores[m.id]?.status === 'FINISHED').length, [scores]);
+
+  const badges = (p) => {
+    const b = [];
+    if (lb[0]?.name === p.name && p.total > 0) b.push({icon:'👑', label:'Leader'});
+    if (p.perfects >= 3) b.push({icon:'🎯', label:'Perfect Score King'});
+    if (p.outcomes > 0 && p.outcomes === p.played) b.push({icon:'🔥', label:'Unbeaten'});
+    if (p.total === 0 && p.played > 2) b.push({icon:'💀', label:'Cursed Predictor'});
+    return b;
+  };
+
+  const medal = ['🥇','🥈','🥉'];
+
+  return (
+    <div>
+      <div style={{background:'linear-gradient(135deg,var(--navy3),var(--navy2))',borderRadius:16,padding:20,marginBottom:20,textAlign:'center'}}>
+        <div style={{fontSize:'2rem'}}>🏆</div>
+        <div style={{fontSize:'1.1rem',fontWeight:700,color:'var(--gold)'}}>Leaderboard</div>
+        <div style={{fontSize:'.78rem',color:'var(--grey)',marginTop:4}}>
+          {finishedCount} of {MATCHES.length} matches completed
+        </div>
+      </div>
+
+      {/* Top 3 podium */}
+      {lb.length >= 3 && (
+        <div style={{display:'flex',justifyContent:'center',alignItems:'flex-end',gap:12,marginBottom:24}}>
+          {[lb[1],lb[0],lb[2]].map((p,i)=>{
+            const heights=[110,140,90];
+            const rank=i===1?0:i===0?1:2;
+            return (
+              <div key={p.name} style={{textAlign:'center',flex:1}}>
+                <PlayerAvatar player={p} size={rank===0?60:50}/>
+                <div style={{fontWeight:700,fontSize:'.85rem',marginTop:4}}>{p.name}</div>
+                <div style={{fontSize:'1.1rem',fontWeight:800,color:'var(--gold)'}}>{p.total}pts</div>
+                <div style={{background:rank===0?'var(--gold)':rank===1?'#aaa':'#a0522d',
+                  borderRadius:'8px 8px 0 0',height:heights[i],marginTop:8,
+                  display:'flex',alignItems:'center',justifyContent:'center',
+                  fontSize:'1.5rem'}}>
+                  {medal[rank]}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Full ranking */}
+      {lb.map((p,i) => (
+        <div key={p.name} style={{background:'var(--navy2)',borderRadius:12,marginBottom:8,overflow:'hidden',
+          border:'1px solid var(--navy3)'}}>
+          <div style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',cursor:'pointer'}}
+            onClick={()=>setExpanded(expanded===p.name?null:p.name)}>
+            <div style={{width:28,fontWeight:800,fontSize:'1.1rem',color:'var(--grey)'}}>{i+1}</div>
+            <PlayerAvatar player={p} size={44}/>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:700}}>{p.name}</div>
+              <div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:4}}>
+                {badges(p).map(b=>(
+                  <span key={b.label} title={b.label} style={{fontSize:'.8rem'}}>{b.icon} {b.label}</span>
+                ))}
+              </div>
+            </div>
+            <div style={{textAlign:'right'}}>
+              <div style={{fontSize:'1.4rem',fontWeight:800,color:'var(--gold)'}}>{p.total}</div>
+              <div style={{fontSize:'.7rem',color:'var(--grey)'}}>pts</div>
+            </div>
+            <div style={{color:'var(--grey)',marginLeft:4}}>{expanded===p.name?'▲':'▼'}</div>
+          </div>
+          {expanded===p.name && (
+            <div style={{borderTop:'1px solid var(--navy3)',padding:'12px 16px',background:'var(--navy)'}}>
+              <div style={{display:'flex',gap:24,marginBottom:12}}>
+                <div><div style={{fontSize:'1.2rem',fontWeight:700,color:'var(--green)'}}>{p.outcomes}</div><div style={{fontSize:'.7rem',color:'var(--grey)'}}>Correct Outcomes</div></div>
+                <div><div style={{fontSize:'1.2rem',fontWeight:700,color:'var(--gold)'}}>{p.perfects}</div><div style={{fontSize:'.7rem',color:'var(--grey)'}}>Perfect Scores</div></div>
+                <div><div style={{fontSize:'1.2rem',fontWeight:700}}>{p.played}</div><div style={{fontSize:'.7rem',color:'var(--grey)'}}>Matches Played</div></div>
+              </div>
+              {Object.entries(p.detail).map(([mid,d])=>{
+                const m = MATCH_BY_ID[parseInt(mid)];
+                if (!m) return null;
+                return (
+                  <div key={mid} style={{display:'flex',justifyContent:'space-between',alignItems:'center',
+                    padding:'6px 0',borderBottom:'1px solid var(--navy3)',fontSize:'.82rem'}}>
+                    <span style={{color:'var(--grey)'}}>{flag(m.home,16)} {m.home} v {m.away} {flag(m.away,16)}</span>
+                    <span style={{color:'var(--grey)'}}>Actual: {d.actual.home}–{d.actual.away} | Pred: {d.pred?`${d.pred.home}–${d.pred.away}`:'—'}</span>
+                    <ScoreBadge pts={d.pts}/>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── ADMIN MODAL ───────────────────────────────────────────────
+function AdminModal({ onClose, onSaveScore, onFetchLive, scores, adminUnlocked, setAdminUnlocked }) {
+  const [pin, setPin]       = React.useState('');
+  const [selMatch, setSel]  = React.useState('');
+  const [homeG, setHomeG]   = React.useState('');
+  const [awayG, setAwayG]   = React.useState('');
+  const [status, setStatus] = React.useState('FINISHED');
+  const [msg, setMsg]       = React.useState('');
+  const [fetching, setFetch]= React.useState(false);
+
+  const unlock = () => {
+    if (pin === CONFIG.adminPin) { setAdminUnlocked(true); setMsg(''); }
+    else setMsg('Wrong PIN');
+  };
+
+  const submit = async () => {
+    if (!selMatch) return;
+    const mid = parseInt(selMatch);
+    setMsg('Saving…');
+    await onSaveScore(mid, parseInt(homeG), parseInt(awayG), status);
+    setMsg('✓ Score saved!');
+    setTimeout(()=>setMsg(''),2000);
+  };
+
+  const liveSync = async () => {
+    setFetch(true); setMsg('Fetching live scores…');
+    await onFetchLive();
+    setFetch(false); setMsg('✓ Sync complete');
+    setTimeout(()=>setMsg(''),2000);
+  };
+
+  const selectedMatch = React.useMemo(() => MATCH_BY_ID[parseInt(selMatch)], [selMatch]);
+  const matchOpts = React.useMemo(() =>
+    MATCHES.filter(m => m.stage === 'group' || m.home !== 'TBD')
+      .concat(MATCHES.filter(m => m.home === 'TBD')), []);
+
+  return (
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal">
+        <div style={{display:'flex',justifyContent:'space-between',marginBottom:16}}>
+          <h2 style={{color:'var(--gold)'}}>⚙️ Admin Panel</h2>
+          <button className="btn btn-ghost" onClick={onClose}>✕</button>
+        </div>
+
+        {!adminUnlocked ? (
+          <div>
+            <p style={{color:'var(--grey)',marginBottom:12,fontSize:'.9rem'}}>Enter admin PIN to continue</p>
+            <input type="password" placeholder="PIN" value={pin} onChange={e=>setPin(e.target.value)}
+              onKeyDown={e=>e.key==='Enter'&&unlock()} style={{marginBottom:12}}/>
+            <button className="btn btn-gold" style={{width:'100%'}} onClick={unlock}>Unlock</button>
+            {msg && <p style={{color:'var(--red)',marginTop:8,fontSize:'.85rem'}}>{msg}</p>}
+          </div>
+        ) : (
+          <div>
+            <div style={{marginBottom:20}}>
+              <label style={{fontSize:'.8rem',color:'var(--grey)',display:'block',marginBottom:6}}>Match</label>
+              <select value={selMatch} onChange={e=>setSel(e.target.value)}
+                style={{background:'var(--navy)',border:'1.5px solid var(--navy3)',color:'var(--white)',
+                  borderRadius:8,padding:'8px',width:'100%'}}>
+                <option value="">— select match —</option>
+                {MATCHES.map(m=>(
+                  <option key={m.id} value={m.id}>
+                    #{m.id} {m.home} v {m.away} {scores[m.id] ? `(${scores[m.id].home}-${scores[m.id].away})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {selMatch && (
+              <div>
+                <div style={{display:'flex',gap:12,alignItems:'center',marginBottom:12}}>
+                  <div style={{flex:1}}>
+                    <label style={{fontSize:'.8rem',color:'var(--grey)',display:'block',marginBottom:4}}>
+                      {selectedMatch?.home||'Home'} Goals
+                    </label>
+                    <input type="number" min="0" value={homeG} onChange={e=>setHomeG(e.target.value)} style={{width:'100%'}}/>
+                  </div>
+                  <div style={{paddingTop:20,color:'var(--grey)',fontWeight:700}}>–</div>
+                  <div style={{flex:1}}>
+                    <label style={{fontSize:'.8rem',color:'var(--grey)',display:'block',marginBottom:4}}>
+                      {selectedMatch?.away||'Away'} Goals
+                    </label>
+                    <input type="number" min="0" value={awayG} onChange={e=>setAwayG(e.target.value)} style={{width:'100%'}}/>
+                  </div>
+                </div>
+                <div style={{marginBottom:12}}>
+                  <label style={{fontSize:'.8rem',color:'var(--grey)',display:'block',marginBottom:4}}>Status</label>
+                  <select value={status} onChange={e=>setStatus(e.target.value)}
+                    style={{background:'var(--navy)',border:'1.5px solid var(--navy3)',color:'var(--white)',
+                      borderRadius:8,padding:'8px',width:'100%'}}>
+                    <option value="FINISHED">FINISHED</option>
+                    <option value="LIVE">LIVE</option>
+                    <option value="SCHEDULED">SCHEDULED</option>
+                  </select>
+                </div>
+                <button className="btn btn-gold" style={{width:'100%',marginBottom:8}} onClick={submit}>
+                  Save Score
+                </button>
+              </div>
+            )}
+            <hr style={{borderColor:'var(--navy3)',margin:'16px 0'}}/>
+            <button className="btn btn-ghost" style={{width:'100%'}} onClick={liveSync} disabled={fetching}>
+              {fetching ? '⏳ Syncing…' : '🌐 Auto-Fetch Live Scores (football-data.org)'}
+            </button>
+            {msg && <p style={{marginTop:8,color:'var(--gold)',fontSize:'.85rem'}}>{msg}</p>}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── REMINDER BANNER ───────────────────────────────────────────
+function ReminderBanner({ predictions, currentPlayer }) {
+  const upcoming = MATCHES.filter(m => {
+    const h = hoursUntil(m.utc);
+    return h > 0 && h < 24 && !isLocked(m.utc);
+  });
+  const missing = upcoming.filter(m => !predictions[m.id]?.[currentPlayer]);
+  if (!missing.length) return null;
+  return (
+    <div style={{background:'var(--amber)',color:'var(--navy)',padding:'10px 16px',borderRadius:8,
+      marginBottom:16,display:'flex',alignItems:'center',gap:8,fontWeight:600,fontSize:'.88rem'}}>
+      ⚠️ {missing.length} match{missing.length>1?'es':''} lock in the next 24h — get your picks in!&nbsp;
+      <span style={{fontSize:'.8rem',fontWeight:400}}>
+        {missing.map(m=>`${m.home} v ${m.away}`).join(' · ')}
+      </span>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════════════════════════════
+function App() {
+  const [currentPlayer, setCurrentPlayer] = React.useState(null);
+  const [predictions,   setPredictions]   = React.useState({});
+  const [scores,        setScores]         = React.useState({});
+  const [tab,           setTab]            = React.useState('predictions');
+  const [stageFilter,   setStageFilter]    = React.useState('all');
+  const [groupFilter,   setGroupFilter]    = React.useState('all');
+  const [dateFilter,    setDateFilter]     = React.useState('all');
+  const [showAdmin,     setShowAdmin]      = React.useState(false);
+  const [adminUnlocked, setAdminUnlocked] = React.useState(false);
+  const [loading,       setLoading]        = React.useState(true);
+  const [error,         setError]          = React.useState('');
+  const noBackend = CONFIG.appsScriptUrl === 'YOUR_APPS_SCRIPT_URL_HERE';
+
+  const load = React.useCallback(async () => {
+    if (noBackend) { setLoading(false); return; }
+    try {
+      const [pRows, sRows] = await Promise.all([apiFetch('getPredictions'), apiFetch('getScores')]);
+      setPredictions(parsePredictions(pRows));
+      setScores(parseScores(sRows));
+    } catch(e) { setError('Could not reach backend. Check Apps Script URL.'); }
+    setLoading(false);
+  }, [noBackend]);
+
+  React.useEffect(()=>{ load(); }, [load]);
+  React.useEffect(()=>{
+    if (noBackend) return;
+    const t = setInterval(load, CONFIG.refreshInterval);
+    return ()=>clearInterval(t);
+  }, [load, noBackend]);
+
+  const handleSavePrediction = React.useCallback(async (matchId, home, away) => {
+    if (!currentPlayer) return;
+    setPredictions(prev => ({...prev, [matchId]: {...prev[matchId], [currentPlayer]: {home, away}}}));
+    if (!noBackend) await apiPost({ action:'savePrediction', matchId, playerName:currentPlayer, home, away });
+  }, [currentPlayer, noBackend]);
+
+  const handleSaveScore = React.useCallback(async (matchId, home, away, status) => {
+    setScores(prev => ({...prev, [matchId]: {home, away, status}}));
+    if (!noBackend) await apiPost({ action:'saveScore', matchId, home, away, status, pin: CONFIG.adminPin });
+  }, [noBackend]);
+
+  const handleFetchLive = React.useCallback(async () => {
+    if (!noBackend) await apiPost({ action:'fetchLiveScores', pin: CONFIG.adminPin });
+    await load();
+  }, [noBackend, load]);
+
+  // Derive sorted unique match dates in CST (sorted by first match UTC on each date)
+  const matchDates = React.useMemo(() => {
+    const seen = new Map();
+    MATCHES.forEach(m => {
+      const d = new Date(m.utc).toLocaleDateString('en-US', {timeZone: CONFIG.timezone, month:'short', day:'numeric'});
+      if (!seen.has(d)) seen.set(d, m.utc);
+    });
+    return Array.from(seen.entries())
+      .sort((a, b) => new Date(a[1]) - new Date(b[1]))
+      .map(([d]) => d);
+  }, []);
+
+  const todayLabel = React.useMemo(() => new Date().toLocaleDateString('en-US', {timeZone: CONFIG.timezone, month:'short', day:'numeric'}), []);
+
+  // Filter matches
+  const visibleMatches = React.useMemo(() => {
+    return MATCHES.filter(m => {
+      if (stageFilter !== 'all' && m.stage !== stageFilter) return false;
+      if (groupFilter !== 'all' && m.group !== groupFilter) return false;
+      if (dateFilter !== 'all') {
+        const d = new Date(m.utc).toLocaleDateString('en-US', {timeZone: CONFIG.timezone, month:'short', day:'numeric'});
+        if (d !== dateFilter) return false;
+      }
+      return true;
+    });
+  }, [stageFilter, groupFilter, dateFilter]);
+
+  const stages = ['all','group','r32','r16','qf','sf','3rd','final'];
+  const groups = ['all','A','B','C','D','E','F','G','H','I','J','K','L'];
+
+  if (!currentPlayer) {
+    return (
+      <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24}}>
+        {/* Hero */}
+        <div style={{textAlign:'center',marginBottom:40}}>
+          <div style={{fontSize:'4rem',marginBottom:8}}>⚽</div>
+          <h1 style={{fontSize:'1.8rem',fontWeight:800,background:'linear-gradient(135deg,var(--gold),var(--gold2))',
+            WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',marginBottom:4}}>
+            World Cup 2026
+          </h1>
+          <p style={{color:'var(--grey)',fontSize:'.9rem'}}>5C'96 Prediction Game · USA · Canada · Mexico</p>
+        </div>
+        {/* Player picker */}
+        <div style={{background:'var(--navy2)',borderRadius:20,padding:28,maxWidth:520,width:'100%',border:'1px solid var(--navy3)'}}>
+          <h2 style={{textAlign:'center',marginBottom:20,fontSize:'1rem',color:'var(--grey)'}}>Who are you?</h2>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16}}>
+            {PLAYERS.map(p=>(
+              <div key={p.name} style={{textAlign:'center',cursor:'pointer'}} onClick={()=>setCurrentPlayer(p.name)}>
+                <PlayerAvatar player={p} size={64}/>
+                <div style={{marginTop:6,fontSize:'.82rem',fontWeight:600}}>{p.name}</div>
+                {!p.avatar && p.name==='Abby' && <div style={{fontSize:'.65rem',color:'var(--grey)'}}>Upload avatar</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+        {noBackend && (
+          <div style={{marginTop:20,background:'var(--amber)',color:'var(--navy)',padding:'10px 16px',borderRadius:8,
+            maxWidth:520,width:'100%',fontSize:'.85rem',fontWeight:600}}>
+            ⚠️ Demo mode — set your Apps Script URL in CONFIG to enable live data sync.
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{maxWidth:900,margin:'0 auto',padding:'0 16px 80px'}}>
+      {/* Header */}
+      <div style={{position:'sticky',top:0,zIndex:100,background:'var(--navy)',
+        borderBottom:'1px solid var(--navy3)',padding:'12px 0',marginBottom:16}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <span style={{fontSize:'1.4rem'}}>⚽</span>
+            <div>
+              <div style={{fontWeight:800,fontSize:'1rem',color:'var(--gold)'}}>WC 2026</div>
+              <div style={{fontSize:'.68rem',color:'var(--grey)'}}>5C'96 Predictions</div>
+            </div>
+          </div>
+          {/* Player avatars row */}
+          <div style={{display:'flex',gap:6,alignItems:'center'}}>
+            {PLAYERS.map(p=>(
+              <div key={p.name} style={{position:'relative'}} onClick={()=>setCurrentPlayer(p.name)}>
+                <PlayerAvatar player={p} size={36} selected={p.name===currentPlayer}/>
+                {p.name===currentPlayer && (
+                  <div style={{position:'absolute',bottom:-2,left:'50%',transform:'translateX(-50%)',
+                    width:6,height:6,borderRadius:'50%',background:'var(--gold)'}}/>
+                )}
+              </div>
+            ))}
+            <button className="btn btn-ghost" style={{marginLeft:4,padding:'4px 8px',fontSize:'.8rem'}}
+              onClick={()=>setShowAdmin(true)}>⚙️</button>
+          </div>
+        </div>
+        {/* Tabs */}
+        <div style={{display:'flex',gap:4,marginTop:12}}>
+          {['predictions','leaderboard'].map(t=>(
+            <button key={t} className="btn" onClick={()=>setTab(t)}
+              style={{flex:1,padding:'8px',background:tab===t?'var(--gold)':'var(--navy2)',
+                color:tab===t?'var(--navy)':'var(--grey)',borderRadius:8,fontSize:'.85rem',
+                border:'1px solid var(--navy3)'}}>
+              {t==='predictions' ? '📋 Predictions' : '🏆 Leaderboard'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Reminder banner */}
+      <ReminderBanner predictions={predictions} currentPlayer={currentPlayer}/>
+
+      {noBackend && (
+        <div style={{background:'var(--amber)',color:'var(--navy)',padding:'8px 12px',borderRadius:8,
+          marginBottom:12,fontSize:'.82rem',fontWeight:600}}>
+          ⚠️ Demo mode — predictions won't persist. Add Apps Script URL to CONFIG.
+        </div>
+      )}
+
+      {loading && <div style={{textAlign:'center',padding:40,color:'var(--grey)'}}>Loading…</div>}
+      {error && <div style={{color:'var(--red)',padding:12,background:'var(--navy2)',borderRadius:8,marginBottom:12}}>{error}</div>}
+
+      {!loading && tab === 'predictions' && (
+        <div>
+          {/* Date filter */}
+          <div style={{display:'flex',gap:6,overflowX:'auto',paddingBottom:6,marginBottom:6,alignItems:'center'}}>
+            <span style={{fontSize:'.72rem',color:'var(--grey)',flexShrink:0,marginRight:2}}>📅</span>
+            {[{label:'All Dates', val:'all'}, ...matchDates.map(d=>({label: d===todayLabel?`Today (${d})`:d, val:d}))].map(({label,val})=>(
+              <button key={val} className="btn" onClick={()=>setDateFilter(val)}
+                style={{whiteSpace:'nowrap',padding:'5px 12px',fontSize:'.78rem',flexShrink:0,
+                  background:dateFilter===val?'var(--gold2)':'var(--navy2)',
+                  color:dateFilter===val?'var(--navy)':'var(--grey)',
+                  border: val===todayLabel&&dateFilter!==val ? '1px solid var(--gold)' : '1px solid var(--navy3)',
+                  borderRadius:99,fontWeight:dateFilter===val?700:400}}>
+                {label}
+              </button>
+            ))}
+          </div>
+          {/* Stage filter */}
+          <div style={{display:'flex',gap:6,overflowX:'auto',paddingBottom:8,marginBottom:8}}>
+            {stages.map(s=>(
+              <button key={s} className="btn" onClick={()=>{setStageFilter(s);setGroupFilter('all');}}
+                style={{whiteSpace:'nowrap',padding:'5px 12px',fontSize:'.78rem',flexShrink:0,
+                  background:stageFilter===s?'var(--gold)':'var(--navy2)',
+                  color:stageFilter===s?'var(--navy)':'var(--grey)',
+                  border:'1px solid var(--navy3)',borderRadius:99}}>
+                {s==='all'?'All Matches':stageLabel(s)}
+              </button>
+            ))}
+          </div>
+          {/* Group filter (only when group stage selected) */}
+          {(stageFilter === 'all' || stageFilter === 'group') && (
+            <div style={{display:'flex',gap:4,overflowX:'auto',paddingBottom:8,marginBottom:12}}>
+              {groups.map(g=>(
+                <button key={g} className="btn" onClick={()=>setGroupFilter(g)}
+                  style={{whiteSpace:'nowrap',padding:'4px 10px',fontSize:'.75rem',flexShrink:0,
+                    background:groupFilter===g?'var(--navy3)':'transparent',
+                    color:groupFilter===g?'var(--white)':'var(--grey)',
+                    border:'1px solid var(--navy3)',borderRadius:99}}>
+                  {g==='all'?'All Groups':`Group ${g}`}
+                </button>
+              ))}
+            </div>
+          )}
+          <div style={{color:'var(--grey)',fontSize:'.78rem',marginBottom:12}}>
+            Showing {visibleMatches.length} matches · Playing as <strong style={{color:'var(--gold)'}}>{currentPlayer}</strong>
+          </div>
+          {visibleMatches.map(m=>(
+            <MatchCard key={m.id} match={m}
+              matchPredictions={predictions[m.id]}
+              matchScore={scores[m.id]}
+              currentPlayer={currentPlayer} onSave={handleSavePrediction}/>
+          ))}
+        </div>
+      )}
+
+      {!loading && tab === 'leaderboard' && (
+        <Leaderboard predictions={predictions} scores={scores}/>
+      )}
+
+      {showAdmin && (
+        <AdminModal onClose={()=>setShowAdmin(false)} onSaveScore={handleSaveScore}
+          onFetchLive={handleFetchLive} scores={scores}
+          adminUnlocked={adminUnlocked} setAdminUnlocked={setAdminUnlocked}/>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
