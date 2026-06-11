@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>⚽ World Cup 2026 — 5C'96 Prediction Game</title>
+<title>⚽ World Cup 2026 — Gushti Prediction Game</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -42,6 +42,8 @@
   @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
   .slide-down{animation:slideDown .3s ease}
   @keyframes pop{0%{transform:scale(.95)}70%{transform:scale(1.05)}100%{transform:scale(1)}}
+  /* Browser-native offscreen skip: renders only what's near the viewport */
+  .match-card{content-visibility:auto;contain-intrinsic-size:0 280px}
 </style>
 </head>
 <body>
@@ -52,7 +54,7 @@
 // CONFIG — fill in your Apps Script Web App URL after deploying
 // ═══════════════════════════════════════════════════════════════
 const CONFIG = {
-  appsScriptUrl: 'https://script.google.com/macros/s/AKfycbxx68Fhe-PqWj8InsdyFP2mbl1yYJV8_KAn-OtH_ms6lHOnqKRUiAhOEK5KzjINeWnIzg/exec',  // paste deployed URL
+  appsScriptUrl: 'https://script.google.com/macros/s/AKfycbxx68Fhe-PqWj8InsdyFP2mbl1yYJV8_KAn-OtH_ms6lHOnqKRUiAhOEK5KzjINeWnIzg/exec',
   adminPin: '2026',          // change to match ADMIN_PIN in apps-script.gs
   refreshInterval: 60000,   // auto-refresh every 60 seconds
   timezone: 'America/Chicago',
@@ -62,20 +64,23 @@ const CONFIG = {
 // PLAYERS
 // ═══════════════════════════════════════════════════════════════
 const PLAYERS = [
-  { name:'Ran',  avatar:'' },
-  { name:'Lun',  avatar:'' },
-  { name:'Rax',  avatar:'' },
-  { name:'Shipon',   avatar:'' },
-  { name:'Aftina',  avatar:'' },
-  { name:'Thila',  avatar:'' },  
+  { name:'Ran',    avatar:'' },
+  { name:'Lun',    avatar:'' },
+  { name:'Rax',    avatar:'' },
+  { name:'Shipon', avatar:'' },
+  { name:'Aftina', avatar:'' },
+  { name:'Thila',  avatar:'' },
   { name:'Jesy',   avatar:'' },
-  { name:'Shamim',   avatar:'' },
-  { name:'Shoily',   avatar:'' },
-  { name:'Adi',   avatar:'' },
-  { name:'Ray',   avatar:'' },
-  { name:'Reezy',   avatar:'' },
-  
+  { name:'Shamim', avatar:'' },
+  { name:'Adi',    avatar:'' },
+  { name:'Reezy',  avatar:'' },
+  { name:'Ray',    avatar:'' },
+  { name:'Shoily', avatar:'' },
+  { name:'Zubi',   avatar:'' },
 ];
+
+// React context — components read the live player list from here instead of global PLAYERS
+const PlayersCtx = React.createContext(PLAYERS);
 
 // ═══════════════════════════════════════════════════════════════
 // FLAGS
@@ -260,8 +265,8 @@ function calcPoints(pred, actual) {
   return (pred.home === actual.home && pred.away === actual.away) ? 5 : 3;
 }
 
-function buildLeaderboard(predictions, scores) {
-  return PLAYERS.map(p => {
+function buildLeaderboard(predictions, scores, players) {
+  return players.map(p => {
     let total=0, outcomes=0, perfects=0, played=0;
     const detail = {};
     MATCHES.forEach(m => {
@@ -353,18 +358,27 @@ const PlayerAvatar = React.memo(function PlayerAvatar({ player, size=56, selecte
   return <img src={player.avatar} style={s} alt={player.name} onClick={onClick} onError={()=>setErr(true)}/>;
 });
 
-const ScoreBadge = React.memo(function ScoreBadge({ pts }) {
+const ScoreBadge = React.memo(function ScoreBadge({ pts, verbose=false }) {
   if (pts == null) return null;
-  if (pts === 5) return <span className="badge badge-gold">🌟 +5</span>;
-  if (pts === 3) return <span className="badge badge-green">✅ +3</span>;
-  return <span className="badge badge-red">❌ 0</span>;
+  if (verbose) {
+    if (pts === 5) return <span className="badge badge-gold">🌟 +5</span>;
+    if (pts === 3) return <span className="badge badge-green">✅ +3</span>;
+    return <span className="badge badge-red">❌ 0</span>;
+  }
+  // compact icon-only for tight table cells
+  if (pts === 5) return <span style={{fontSize:'.7rem'}}>🌟</span>;
+  if (pts === 3) return <span style={{fontSize:'.7rem'}}>✅</span>;
+  return <span style={{fontSize:'.7rem'}}>❌</span>;
 });
 
 // ── MATCH CARD ────────────────────────────────────────────────
 const MatchCard = React.memo(function MatchCard({ match, matchPredictions, matchScore, currentPlayer, onSave }) {
+  const allPlayers = React.useContext(PlayersCtx);
   const sc = matchScore;
-  const locked   = isLocked(match.utc);
-  const started  = isStarted(match.utc);
+  // Compute once — avoids 3 separate new Date() calls per render
+  const hours    = hoursUntil(match.utc);
+  const locked   = hours < 5;
+  const started  = hours < 0;
   const finished = sc?.status === 'FINISHED';
   const myPred   = matchPredictions?.[currentPlayer] || {};
   const [homeVal, setHomeVal] = React.useState(myPred.home ?? '');
@@ -389,7 +403,7 @@ const MatchCard = React.memo(function MatchCard({ match, matchPredictions, match
   const isTBD = match.home === 'TBD';
 
   return (
-    <div style={{background:'var(--navy2)',borderRadius:12,padding:'16px',marginBottom:12,
+    <div className="match-card" style={{background:'var(--navy2)',borderRadius:12,padding:'16px',marginBottom:12,
       border: finished ? '1px solid var(--green)' : started ? '1px solid var(--amber)' : '1px solid var(--navy3)',
       animation: finished ? 'none' : undefined}}>
       {/* Match Header */}
@@ -404,7 +418,7 @@ const MatchCard = React.memo(function MatchCard({ match, matchPredictions, match
           {started && !finished && <span className="badge badge-amber pulse">LIVE</span>}
           {locked && !started && <span className="badge badge-grey">🔒 Locked</span>}
           {!locked && !started && <span style={{fontSize:'.7rem',color:'var(--grey)'}}>
-            Locks in {Math.max(0,Math.floor(hoursUntil(match.utc)))}h
+            Locks in {Math.max(0,Math.floor(hours))}h
           </span>}
         </div>
       </div>
@@ -435,16 +449,18 @@ const MatchCard = React.memo(function MatchCard({ match, matchPredictions, match
       </div>
 
       {/* Prediction Grid */}
-      <div style={{overflowX:'auto'}}>
-        <table style={{width:'100%',borderCollapse:'collapse',minWidth:420}}>
+      <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
+        <table style={{width:'100%',borderCollapse:'collapse',minWidth: allPlayers.length > 8 ? 600 : 420}}>
           <thead>
             <tr>
-              <td style={{width:80}}></td>
-              {PLAYERS.map(p=>(
-                <td key={p.name} style={{textAlign:'center',padding:'4px 6px'}}>
-                  <PlayerAvatar player={p} size={32}/>
-                  <div style={{fontSize:'.65rem',color:p.name===currentPlayer?'var(--gold)':'var(--grey)',marginTop:2,fontWeight:p.name===currentPlayer?700:400}}>
-                    {p.name}
+              <td style={{width:64}}></td>
+              {allPlayers.map(p=>(
+                <td key={p.name} style={{textAlign:'center',padding:'2px 3px'}}>
+                  <PlayerAvatar player={p} size={22}/>
+                  <div style={{fontSize:'.58rem',color:p.name===currentPlayer?'var(--gold)':'var(--grey)',marginTop:1,
+                    fontWeight:p.name===currentPlayer?700:400,
+                    maxWidth:38,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',margin:'1px auto 0'}}>
+                    {p.name.length > 5 ? p.name.slice(0,5) : p.name}
                   </div>
                 </td>
               ))}
@@ -452,30 +468,30 @@ const MatchCard = React.memo(function MatchCard({ match, matchPredictions, match
           </thead>
           <tbody>
             <tr>
-              <td style={{fontSize:'.72rem',color:'var(--grey)',paddingRight:8}}>Prediction</td>
-              {PLAYERS.map(p=>{
+              <td style={{fontSize:'.7rem',color:'var(--grey)',paddingRight:6}}>Prediction</td>
+              {allPlayers.map(p=>{
                 const pred = matchPredictions?.[p.name];
                 const pts  = finished ? calcPoints(pred, sc) : null;
                 const isMe = p.name === currentPlayer;
                 return (
-                  <td key={p.name} style={{textAlign:'center',padding:'4px 6px'}}>
+                  <td key={p.name} style={{textAlign:'center',padding:'3px 2px'}}>
                     {isMe && !locked ? (
-                      <div style={{display:'flex',alignItems:'center',gap:4,justifyContent:'center'}}>
+                      <div style={{display:'flex',alignItems:'center',gap:2,justifyContent:'center'}}>
                         <input type="number" min="0" max="20" value={homeVal}
-                          onChange={e=>setHomeVal(e.target.value)} style={{width:40,padding:'4px'}}/>
-                        <span style={{color:'var(--grey)'}}>–</span>
+                          onChange={e=>setHomeVal(e.target.value)} style={{width:36,padding:'3px'}}/>
+                        <span style={{color:'var(--grey)',fontSize:'.8rem'}}>–</span>
                         <input type="number" min="0" max="20" value={awayVal}
-                          onChange={e=>setAwayVal(e.target.value)} style={{width:40,padding:'4px'}}/>
+                          onChange={e=>setAwayVal(e.target.value)} style={{width:36,padding:'3px'}}/>
                       </div>
                     ) : pred ? (
                       <div>
-                        <span style={{fontWeight:700,color:pts===5?'var(--gold)':pts===3?'var(--green)':pts===0?'var(--red)':'var(--white)'}}>
+                        <span style={{fontWeight:700,fontSize:'.8rem',color:pts===5?'var(--gold)':pts===3?'var(--green)':pts===0?'var(--red)':'var(--white)'}}>
                           {pred.home}–{pred.away}
                         </span>
-                        {pts != null && <div style={{marginTop:2}}><ScoreBadge pts={pts}/></div>}
+                        {pts != null && <div style={{marginTop:1}}><ScoreBadge pts={pts}/></div>}
                       </div>
                     ) : (
-                      <span style={{color:'var(--navy3)',fontSize:'.8rem'}}>—</span>
+                      <span style={{color:'var(--navy3)',fontSize:'.75rem'}}>—</span>
                     )}
                   </td>
                 );
@@ -499,18 +515,19 @@ const MatchCard = React.memo(function MatchCard({ match, matchPredictions, match
 
 // ── LEADERBOARD ───────────────────────────────────────────────
 function Leaderboard({ predictions, scores }) {
-  const lb = React.useMemo(() => buildLeaderboard(predictions, scores), [predictions, scores]);
+  const allPlayers = React.useContext(PlayersCtx);
+  const lb = React.useMemo(() => buildLeaderboard(predictions, scores, allPlayers), [predictions, scores, allPlayers]);
   const [expanded, setExpanded] = React.useState(null);
   const finishedCount = React.useMemo(() => MATCHES.filter(m => scores[m.id]?.status === 'FINISHED').length, [scores]);
 
-  const badges = (p) => {
+  const badges = React.useCallback((p) => {
     const b = [];
     if (lb[0]?.name === p.name && p.total > 0) b.push({icon:'👑', label:'Leader'});
     if (p.perfects >= 3) b.push({icon:'🎯', label:'Perfect Score King'});
     if (p.outcomes > 0 && p.outcomes === p.played) b.push({icon:'🔥', label:'Unbeaten'});
     if (p.total === 0 && p.played > 2) b.push({icon:'💀', label:'Cursed Predictor'});
     return b;
-  };
+  }, [lb]);
 
   const medal = ['🥇','🥈','🥉'];
 
@@ -584,7 +601,7 @@ function Leaderboard({ predictions, scores }) {
                     padding:'6px 0',borderBottom:'1px solid var(--navy3)',fontSize:'.82rem'}}>
                     <span style={{color:'var(--grey)'}}>{flag(m.home,16)} {m.home} v {m.away} {flag(m.away,16)}</span>
                     <span style={{color:'var(--grey)'}}>Actual: {d.actual.home}–{d.actual.away} | Pred: {d.pred?`${d.pred.home}–${d.pred.away}`:'—'}</span>
-                    <ScoreBadge pts={d.pts}/>
+                    <ScoreBadge pts={d.pts} verbose/>
                   </div>
                 );
               })}
@@ -733,10 +750,23 @@ function App() {
   const [currentPlayer, setCurrentPlayer] = React.useState(null);
   const [predictions,   setPredictions]   = React.useState({});
   const [scores,        setScores]         = React.useState({});
+  const [extraPlayers,  setExtraPlayers]   = React.useState([]);
+  // Fingerprints: track last-seen data signatures so 60s polls that return
+  // identical data don't trigger re-renders of all 104 MatchCards.
+  const predFpRef  = React.useRef('');
+  const scoreFpRef = React.useRef('');
+  const allPlayers = React.useMemo(() => {
+    const known = new Set(PLAYERS.map(p => p.name));
+    return [...PLAYERS, ...extraPlayers.filter(p => !known.has(p.name))];
+  }, [extraPlayers]);
   const [tab,           setTab]            = React.useState('predictions');
   const [stageFilter,   setStageFilter]    = React.useState('all');
   const [groupFilter,   setGroupFilter]    = React.useState('all');
-  const [dateFilter,    setDateFilter]     = React.useState('all');
+  const [dateFilter,    setDateFilter]     = React.useState(() => {
+    // Default to today's matches; fall back to 'all' if today has no matches
+    const today = new Date().toLocaleDateString('en-US', {timeZone: CONFIG.timezone, month:'short', day:'numeric'});
+    return MATCHES.some(m => new Date(m.utc).toLocaleDateString('en-US',{timeZone:CONFIG.timezone,month:'short',day:'numeric'}) === today) ? today : 'all';
+  });
   const [showAdmin,     setShowAdmin]      = React.useState(false);
   const [adminUnlocked, setAdminUnlocked] = React.useState(false);
   const [loading,       setLoading]        = React.useState(true);
@@ -747,8 +777,20 @@ function App() {
     if (noBackend) { setLoading(false); return; }
     try {
       const [pRows, sRows] = await Promise.all([apiFetch('getPredictions'), apiFetch('getScores')]);
-      setPredictions(parsePredictions(pRows));
-      setScores(parseScores(sRows));
+
+      // Cheap fingerprint: row count + latest UpdatedAt. Avoids re-renders when nothing changed.
+      const predFp  = pRows.length  + '|' + (pRows[pRows.length - 1]?.UpdatedAt  || '');
+      const scoreFp = sRows.length  + '|' + (sRows[sRows.length - 1]?.UpdatedAt  || '');
+      if (predFp  !== predFpRef.current)  { predFpRef.current  = predFp;  setPredictions(parsePredictions(pRows)); }
+      if (scoreFp !== scoreFpRef.current) { scoreFpRef.current = scoreFp; setScores(parseScores(sRows)); }
+
+      // Auto-register extra players; stable reference if list hasn't changed
+      const known  = new Set(PLAYERS.map(p => p.name));
+      const extras = [...new Set(pRows.map(r => r.PlayerName).filter(n => n && !known.has(n)))];
+      setExtraPlayers(prev => {
+        const same = prev.length === extras.length && extras.every((n, i) => prev[i]?.name === n);
+        return same ? prev : extras.map(name => ({ name, avatar: '' }));
+      });
     } catch(e) { setError('Could not reach backend. Check Apps Script URL.'); }
     setLoading(false);
   }, [noBackend]);
@@ -806,8 +848,23 @@ function App() {
   const stages = ['all','group','r32','r16','qf','sf','3rd','final'];
   const groups = ['all','A','B','C','D','E','F','G','H','I','J','K','L'];
 
+  const [newPlayerName, setNewPlayerName] = React.useState('');
+  const [showNewPlayerInput, setShowNewPlayerInput] = React.useState(false);
+  const handleJoinNew = () => {
+    const n = newPlayerName.trim();
+    if (!n) return;
+    setExtraPlayers(prev => {
+      if (prev.find(p => p.name === n) || PLAYERS.find(p => p.name === n)) return prev;
+      return [...prev, { name: n, avatar: '' }];
+    });
+    setCurrentPlayer(n);
+    setNewPlayerName('');
+    setShowNewPlayerInput(false);
+  };
+
   if (!currentPlayer) {
     return (
+      <PlayersCtx.Provider value={allPlayers}>
       <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24}}>
         {/* Hero */}
         <div style={{textAlign:'center',marginBottom:40}}>
@@ -816,20 +873,35 @@ function App() {
             WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',marginBottom:4}}>
             World Cup 2026
           </h1>
-          <p style={{color:'var(--grey)',fontSize:'.9rem'}}>5C'96 Prediction Game · USA · Canada · Mexico</p>
+          <p style={{color:'var(--grey)',fontSize:'.9rem'}}>Gushti Prediction Game · USA · Canada · Mexico</p>
         </div>
         {/* Player picker */}
-        <div style={{background:'var(--navy2)',borderRadius:20,padding:28,maxWidth:520,width:'100%',border:'1px solid var(--navy3)'}}>
+        <div style={{background:'var(--navy2)',borderRadius:20,padding:28,maxWidth:600,width:'100%',border:'1px solid var(--navy3)'}}>
           <h2 style={{textAlign:'center',marginBottom:20,fontSize:'1rem',color:'var(--grey)'}}>Who are you?</h2>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16}}>
-            {PLAYERS.map(p=>(
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(82px,1fr))',gap:14}}>
+            {allPlayers.map(p=>(
               <div key={p.name} style={{textAlign:'center',cursor:'pointer'}} onClick={()=>setCurrentPlayer(p.name)}>
                 <PlayerAvatar player={p} size={64}/>
                 <div style={{marginTop:6,fontSize:'.82rem',fontWeight:600}}>{p.name}</div>
-                {!p.avatar && p.name==='Abby' && <div style={{fontSize:'.65rem',color:'var(--grey)'}}>Upload avatar</div>}
               </div>
             ))}
+            {/* New player tile */}
+            <div style={{textAlign:'center',cursor:'pointer'}} onClick={()=>setShowNewPlayerInput(v=>!v)}>
+              <div style={{width:64,height:64,borderRadius:'50%',border:'2px dashed var(--navy3)',display:'flex',
+                alignItems:'center',justifyContent:'center',fontSize:'1.6rem',margin:'0 auto',
+                background:'var(--navy)',color:'var(--grey)'}}>＋</div>
+              <div style={{marginTop:6,fontSize:'.82rem',color:'var(--grey)'}}>New player</div>
+            </div>
           </div>
+          {showNewPlayerInput && (
+            <div style={{marginTop:20,display:'flex',gap:8}}>
+              <input type="text" placeholder="Enter your name…" value={newPlayerName}
+                onChange={e=>setNewPlayerName(e.target.value)}
+                onKeyDown={e=>e.key==='Enter' && handleJoinNew()}
+                style={{flex:1}} autoFocus/>
+              <button className="btn btn-gold" onClick={handleJoinNew}>Join</button>
+            </div>
+          )}
         </div>
         {noBackend && (
           <div style={{marginTop:20,background:'var(--amber)',color:'var(--navy)',padding:'10px 16px',borderRadius:8,
@@ -838,10 +910,12 @@ function App() {
           </div>
         )}
       </div>
+      </PlayersCtx.Provider>
     );
   }
 
   return (
+    <PlayersCtx.Provider value={allPlayers}>
     <div style={{maxWidth:900,margin:'0 auto',padding:'0 16px 80px'}}>
       {/* Header */}
       <div style={{position:'sticky',top:0,zIndex:100,background:'var(--navy)',
@@ -851,21 +925,22 @@ function App() {
             <span style={{fontSize:'1.4rem'}}>⚽</span>
             <div>
               <div style={{fontWeight:800,fontSize:'1rem',color:'var(--gold)'}}>WC 2026</div>
-              <div style={{fontSize:'.68rem',color:'var(--grey)'}}>5C'96 Predictions</div>
+              <div style={{fontSize:'.68rem',color:'var(--grey)'}}>Gushti Predictions</div>
             </div>
           </div>
-          {/* Player avatars row */}
-          <div style={{display:'flex',gap:6,alignItems:'center'}}>
-            {PLAYERS.map(p=>(
-              <div key={p.name} style={{position:'relative'}} onClick={()=>setCurrentPlayer(p.name)}>
-                <PlayerAvatar player={p} size={36} selected={p.name===currentPlayer}/>
+          {/* Player avatars row — horizontally scrollable for large groups */}
+          <div style={{display:'flex',gap:4,alignItems:'center',overflowX:'auto',
+            paddingBottom:4,maxWidth:'100%',scrollbarWidth:'none'}}>
+            {allPlayers.map(p=>(
+              <div key={p.name} style={{position:'relative',flexShrink:0,cursor:'pointer'}} onClick={()=>setCurrentPlayer(p.name)}>
+                <PlayerAvatar player={p} size={28} selected={p.name===currentPlayer}/>
                 {p.name===currentPlayer && (
                   <div style={{position:'absolute',bottom:-2,left:'50%',transform:'translateX(-50%)',
-                    width:6,height:6,borderRadius:'50%',background:'var(--gold)'}}/>
+                    width:5,height:5,borderRadius:'50%',background:'var(--gold)'}}/>
                 )}
               </div>
             ))}
-            <button className="btn btn-ghost" style={{marginLeft:4,padding:'4px 8px',fontSize:'.8rem'}}
+            <button className="btn btn-ghost" style={{marginLeft:4,padding:'3px 7px',fontSize:'.75rem',flexShrink:0}}
               onClick={()=>setShowAdmin(true)}>⚙️</button>
           </div>
         </div>
@@ -959,6 +1034,7 @@ function App() {
           adminUnlocked={adminUnlocked} setAdminUnlocked={setAdminUnlocked}/>
       )}
     </div>
+    </PlayersCtx.Provider>
   );
 }
 
