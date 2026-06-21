@@ -850,6 +850,28 @@ function App() {
 
   const todayLabel = React.useMemo(() => new Date().toLocaleDateString('en-US', {timeZone: CONFIG.timezone, month:'short', day:'numeric'}), []);
 
+  // Date slider order: All Dates | today + future (chronological) | past dates (most recent first)
+  const sortedDateTabs = React.useMemo(() => {
+    const now = Date.now();
+    const todayIdx = matchDates.indexOf(todayLabel);
+    if (todayIdx !== -1) {
+      // Today has matches — split cleanly at today
+      const past   = matchDates.slice(0, todayIdx);
+      const todayAndFuture = matchDates.slice(todayIdx);
+      return [...todayAndFuture, ...[...past].reverse()];
+    }
+    // Today has no matches — find first date whose first match is in the future
+    const firstFutureIdx = matchDates.findIndex(d => {
+      const m = MATCHES.find(x => MATCH_DATEKEY[x.id] === d);
+      return m && new Date(m.utc).getTime() > now;
+    });
+    if (firstFutureIdx === -1) return [...matchDates].reverse(); // all past
+    if (firstFutureIdx === 0)  return matchDates;                // all future
+    const past   = matchDates.slice(0, firstFutureIdx);
+    const future = matchDates.slice(firstFutureIdx);
+    return [...future, ...[...past].reverse()];
+  }, [matchDates, todayLabel]);
+
   // Filter and sort matches: unplayed/live at top (time order), finished at bottom (time order)
   const visibleMatches = React.useMemo(() => {
     const filtered = MATCHES.filter(m => {
@@ -1018,7 +1040,7 @@ function App() {
           {/* Date filter */}
           <div style={{display:'flex',gap:6,overflowX:'auto',paddingBottom:6,marginBottom:6,alignItems:'center'}}>
             <span style={{fontSize:'.72rem',color:'var(--grey)',flexShrink:0,marginRight:2}}>📅</span>
-            {[{label:'All Dates', val:'all'}, ...matchDates.map(d=>({label: d===todayLabel?`Today (${d})`:d, val:d}))].map(({label,val})=>(
+            {[{label:'All Dates', val:'all'}, ...sortedDateTabs.map(d=>({label: d===todayLabel?`Today (${d})`:d, val:d}))].map(({label,val})=>(
               <button key={val} className="btn" onClick={()=>setDateFilter(val)}
                 style={{whiteSpace:'nowrap',padding:'5px 12px',fontSize:'.78rem',flexShrink:0,
                   background:dateFilter===val?'var(--gold2)':'var(--navy2)',
