@@ -517,6 +517,20 @@ function Leaderboard({ predictions, scores }) {
   const [expanded, setExpanded] = React.useState(null);
   const finishedCount = React.useMemo(() => MATCHES.filter(m => scores[m.id]?.status === 'FINISHED').length, [scores]);
 
+  // Load previous rankings snapshot for movement indicators
+  const prevRankings = React.useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('wc2026_prevRankings') || 'null'); }
+    catch { return null; }
+  }, [scores]); // re-read whenever scores change (snapshot was just written)
+
+  const movementBadge = (name, currentRank) => {
+    if (!prevRankings || prevRankings[name] == null) return null;
+    const diff = prevRankings[name] - currentRank; // positive = moved up (was higher number rank)
+    if (diff === 0) return <span style={{fontSize:'.75rem',color:'var(--grey)',fontWeight:600,minWidth:28,textAlign:'center'}}>—</span>;
+    if (diff > 0)   return <span style={{fontSize:'.75rem',color:'var(--green)',fontWeight:700,minWidth:28,textAlign:'center'}}>↑{diff}</span>;
+    return           <span style={{fontSize:'.75rem',color:'var(--red)',fontWeight:700,minWidth:28,textAlign:'center'}}>↓{Math.abs(diff)}</span>;
+  };
+
   const badges = React.useCallback((p) => {
     const b = [];
     if (lb[0]?.name === p.name && p.total > 0) b.push({icon:'👑', label:'Leader'});
@@ -568,6 +582,7 @@ function Leaderboard({ predictions, scores }) {
           <div style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',cursor:'pointer'}}
             onClick={()=>setExpanded(expanded===p.name?null:p.name)}>
             <div style={{width:28,fontWeight:800,fontSize:'1.1rem',color:'var(--grey)'}}>{i+1}</div>
+            {movementBadge(p.name, i + 1)}
             <PlayerAvatar player={p} size={44}/>
             <div style={{flex:1}}>
               <div style={{fontWeight:700}}>{p.name}</div>
@@ -780,6 +795,11 @@ function App() {
   // identical data don't trigger re-renders of all 104 MatchCards.
   const predFpRef  = React.useRef('');
   const scoreFpRef = React.useRef('');
+  // Always-current refs so snapshot helpers avoid stale closures
+  const scoresRef      = React.useRef(scores);
+  const predictionsRef = React.useRef(predictions);
+  React.useEffect(() => { scoresRef.current      = scores;      }, [scores]);
+  React.useEffect(() => { predictionsRef.current = predictions; }, [predictions]);
   const allPlayers = React.useMemo(() => {
     const known = new Set(PLAYERS.map(p => p.name));
     return [...PLAYERS, ...extraPlayers.filter(p => !known.has(p.name))];
@@ -826,15 +846,26 @@ function App() {
     if (!noBackend) await apiPost({ action:'savePrediction', matchId, playerName:currentPlayer, home, away });
   }, [currentPlayer, noBackend]);
 
+  // Snapshot current leaderboard positions into localStorage before scores change
+  const snapshotRankings = React.useCallback(() => {
+    try {
+      const lb = buildLeaderboard(predictionsRef.current, scoresRef.current, PLAYERS);
+      const snap = Object.fromEntries(lb.map((p, i) => [p.name, i + 1]));
+      localStorage.setItem('wc2026_prevRankings', JSON.stringify(snap));
+    } catch(e) {}
+  }, []);
+
   const handleSaveScore = React.useCallback(async (matchId, home, away, status) => {
+    snapshotRankings(); // capture rankings BEFORE this score is applied
     setScores(prev => ({...prev, [matchId]: {home, away, status}}));
     if (!noBackend) await apiPost({ action:'saveScore', matchId, home, away, status, pin: CONFIG.adminPin });
-  }, [noBackend]);
+  }, [noBackend, snapshotRankings]);
 
   const handleFetchLive = React.useCallback(async () => {
+    snapshotRankings(); // capture rankings BEFORE bulk live scores arrive
     if (!noBackend) await apiPost({ action:'fetchLiveScores', pin: CONFIG.adminPin });
     await load();
-  }, [noBackend, load]);
+  }, [noBackend, load, snapshotRankings]);
 
   // Derive sorted unique match dates in CST (sorted by first match UTC on each date)
   const matchDates = React.useMemo(() => {
@@ -1095,11 +1126,9 @@ function App() {
 
       {showAdmin && (
         <AdminModal onClose={()=>setShowAdmin(false)} onSaveScore={handleSaveScore}
-          onFetchLive={handleFetchLive} scores={scores}
           adminUnlocked={adminUnlocked} setAdminUnlocked={setAdminUnlocked}/>
       )}
     </div>
-    </PlayersCtx.Provider>
   );
 }
 
