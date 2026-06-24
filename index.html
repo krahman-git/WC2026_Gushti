@@ -1126,6 +1126,7 @@ function App() {
 
       {showAdmin && (
         <AdminModal onClose={()=>setShowAdmin(false)} onSaveScore={handleSaveScore}
+          onFetchLive={handleFetchLive} scores={scores}
           adminUnlocked={adminUnlocked} setAdminUnlocked={setAdminUnlocked}/>
       )}
     </div>
