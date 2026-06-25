@@ -533,10 +533,23 @@ function Leaderboard({ predictions, scores }) {
 
   const badges = React.useCallback((p) => {
     const b = [];
-    if (lb[0]?.name === p.name && p.total > 0) b.push({icon:'👑', label:'Leader'});
-    if (p.perfects >= 3) b.push({icon:'🎯', label:'Perfect Score King'});
-    if (p.outcomes > 0 && p.outcomes === p.played) b.push({icon:'🔥', label:'Unbeaten'});
-    if (p.total === 0 && p.played > 2) b.push({icon:'💀', label:'Cursed Predictor'});
+    const rank = lb.findIndex(x => x.name === p.name); // 0-indexed
+    const last  = lb.length - 1;
+
+    // 🏆 Standings badges
+    if (rank === 0 && p.total > 0)  b.push({icon:'🐙', label:'Octopus Paul'});
+    if (rank === 1 && p.total > 0)  b.push({icon:'🤏', label:'So Close, Yet So Far'});
+    if (rank === 2 && p.total > 0)  b.push({icon:'🥉', label:'Bronze & Crying'});
+    if (rank === 3)                  b.push({icon:'🫠', label:'4th — The Worst Place'});
+    if (rank === last && lb.length >= 4) b.push({icon:'🫛', label:'Ootta Bhaza Corolla'});
+
+    // 🎯 Performance badges
+    if (p.perfects >= 3)                            b.push({icon:'🎯', label:'Perfect Score King'});
+    if (p.outcomes > 0 && p.outcomes === p.played)  b.push({icon:'🔥', label:'Unbeaten Oracle'});
+    if (p.total === 0 && p.played > 2)              b.push({icon:'💀', label:'Cursed Predictor'});
+    if (p.perfects === 0 && p.played > 5)           b.push({icon:'🙈', label:'Never Exactly Right'});
+    if (rank === 0 && p.perfects === 0)             b.push({icon:'🍀', label:'Lucky, Not Good'});
+
     return b;
   }, [lb]);
 
