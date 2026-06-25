@@ -538,9 +538,12 @@ function Leaderboard({ predictions, scores }) {
 
     // 🏆 Standings badges
     if (rank === 0 && p.total > 0)  b.push({icon:'🐙', label:'Octopus Paul'});
-    if (rank === 1 && p.total > 0)  b.push({icon:'🤏', label:'So Close, Yet So Far'});
-    if (rank === 2 && p.total > 0)  b.push({icon:'🥉', label:'Bronze & Crying'});
-    if (rank === 3)                  b.push({icon:'🫠', label:'4th — The Worst Place'});
+    if (rank === 1)                  b.push({icon:'😤', label:'Aida Kisu Hoilo?'});
+    if (rank === 2)                  b.push({icon:'🙅', label:"If I wasn't 3rd I'd be 1st"});
+    if (rank === 3)                  b.push({icon:'🔴', label:'4thsenal'});
+    if (rank === 4)                  b.push({icon:'🤷🏿‍♂️', label:'Why Always Me'});
+    if (rank === 5)                  b.push({icon:'⚽', label:'Tsk Tsk Tsk'});
+    if (rank === 6)                  b.push({icon:'😳', label:'Isshiree Khelmu Na'});
     if (rank === last && lb.length >= 4) b.push({icon:'🫛', label:'Ootta Bhaza Corolla'});
 
     // 🎯 Performance badges
