@@ -1056,6 +1056,18 @@ function App() {
               onClick={()=>setShowAdmin(true)}>⚙️</button>
           </div>
         </div>
+        {/* Rules banner */}
+        <div style={{marginTop:10,padding:'6px 12px',background:'rgba(201,162,39,0.1)',
+          border:'1px solid rgba(201,162,39,0.3)',borderRadius:8,display:'flex',
+          alignItems:'center',gap:8}}>
+          <span style={{fontSize:'.9rem'}}>📋</span>
+          <span style={{fontSize:'.72rem',color:'var(--gold)',fontWeight:600}}>
+            Predict the score at 90 mins only.&nbsp;
+            <span style={{color:'var(--grey)',fontWeight:400}}>
+              Goals in extra time or penalties don't count.
+            </span>
+          </span>
+        </div>
         {/* Tabs */}
         <div style={{display:'flex',gap:4,marginTop:12}}>
           {['predictions','leaderboard'].map(t=>(
