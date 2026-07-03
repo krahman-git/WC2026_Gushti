@@ -547,7 +547,8 @@ function Leaderboard({ predictions, scores }) {
     if (rank === last && lb.length >= 4) b.push({icon:'🫛', label:'Ootta Bhaza Corolla'});
 
     // 🎯 Performance badges
-    if (p.perfects >= 3)                            b.push({icon:'🎯', label:'Perfect Score King'});
+    const maxPerfects = Math.max(0, ...lb.map(x => x.perfects));
+    if (maxPerfects > 0 && p.perfects === maxPerfects) b.push({icon:'🎯', label:'Perfect Score King'});
     if (p.outcomes > 0 && p.outcomes === p.played)  b.push({icon:'🔥', label:'Unbeaten Oracle'});
     if (p.total === 0 && p.played > 2)              b.push({icon:'💀', label:'Cursed Predictor'});
     if (p.perfects === 0 && p.played > 5)           b.push({icon:'🙈', label:'Never Exactly Right'});
