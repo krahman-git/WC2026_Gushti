@@ -282,7 +282,16 @@ var MATCH_LOOKUP = {
   85: {home:'Switzerland',         away:'Algeria'},
   86: {home:'Australia',           away:'Egypt'},
   87: {home:'Argentina',           away:'Cape Verde'},
-  88: {home:'Colombia',            away:'Ghana'}
+  88: {home:'Colombia',            away:'Ghana'},
+  // ── ROUND OF 16 ─────────────────────────────────────────────
+  89: {home:'Canada',      away:'Morocco'},
+  90: {home:'Paraguay',    away:'France'},
+  91: {home:'Brazil',      away:'Norway'},
+  92: {home:'Mexico',      away:'England'},
+  93: {home:'Portugal',    away:'Spain'},
+  94: {home:'USA',         away:'Belgium'},
+  95: {home:'Argentina',   away:'Egypt'},
+  96: {home:'Switzerland', away:'Colombia'}
 };
 
 function fetchLiveScores() {
