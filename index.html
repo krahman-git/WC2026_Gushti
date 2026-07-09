@@ -57,7 +57,7 @@ const CONFIG = {
   appsScriptUrl: 'https://script.google.com/macros/s/AKfycbxx68Fhe-PqWj8InsdyFP2mbl1yYJV8_KAn-OtH_ms6lHOnqKRUiAhOEK5KzjINeWnIzg/exec',
   adminPin: '2026',          // change to match ADMIN_PIN in apps-script.gs
   refreshInterval: 60000,   // auto-refresh every 60 seconds
-  timezone: 'America/Chicago',
+  timezone: 'America/Regina',  // UTC-6 year-round = CST (no daylight saving)
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -216,10 +216,10 @@ const MATCHES = [
   {id:95, group:'', stage:'r16', home:'Argentina',   away:'Egypt',      utc:'2026-07-07T16:00:00Z', venue:'Atlanta'},
   {id:96, group:'', stage:'r16', home:'Switzerland', away:'Colombia',   utc:'2026-07-07T20:00:00Z', venue:'Vancouver'},
   // ── QUARTER-FINALS ──────────────────────────────────────────
-  {id:97, group:'', stage:'qf', home:'France',      away:'Morocco',      utc:'2026-07-09T19:00:00Z', venue:'Foxborough'},
-  {id:98, group:'', stage:'qf', home:'Spain',       away:'Belgium',      utc:'2026-07-10T18:00:00Z', venue:'Los Angeles'},
-  {id:99, group:'', stage:'qf', home:'Norway',      away:'England',      utc:'2026-07-11T20:00:00Z', venue:'Miami'},
-  {id:100,group:'', stage:'qf', home:'Argentina',   away:'Switzerland',  utc:'2026-07-12T00:00:00Z', venue:'Kansas City'},
+  {id:97, group:'', stage:'qf', home:'France',      away:'Morocco',      utc:'2026-07-09T21:00:00Z', venue:'Foxborough'},
+  {id:98, group:'', stage:'qf', home:'Spain',       away:'Belgium',      utc:'2026-07-10T20:00:00Z', venue:'Los Angeles'},
+  {id:99, group:'', stage:'qf', home:'Norway',      away:'England',      utc:'2026-07-11T22:00:00Z', venue:'Miami'},
+  {id:100,group:'', stage:'qf', home:'Argentina',   away:'Switzerland',  utc:'2026-07-12T02:00:00Z', venue:'Kansas City'},
   // ── SEMI-FINALS ─────────────────────────────────────────────
   {id:101,group:'', stage:'sf', home:'TBD', away:'TBD', label:'Semi-Final 1', utc:'2026-07-14T19:00:00Z', venue:'Arlington'},
   {id:102,group:'', stage:'sf', home:'TBD', away:'TBD', label:'Semi-Final 2', utc:'2026-07-15T19:00:00Z', venue:'Atlanta'},
