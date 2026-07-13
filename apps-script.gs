@@ -291,7 +291,15 @@ var MATCH_LOOKUP = {
   93: {home:'Portugal',    away:'Spain'},
   94: {home:'USA',         away:'Belgium'},
   95: {home:'Argentina',   away:'Egypt'},
-  96: {home:'Switzerland', away:'Colombia'}
+  96: {home:'Switzerland', away:'Colombia'},
+  // ── QUARTER-FINALS ──────────────────────────────────────────
+  97:  {home:'France',     away:'Morocco'},
+  98:  {home:'Spain',      away:'Belgium'},
+  99:  {home:'Norway',     away:'England'},
+  100: {home:'Argentina',  away:'Switzerland'},
+  // ── SEMI-FINALS ─────────────────────────────────────────────
+  101: {home:'France',  away:'Spain'},
+  102: {home:'England', away:'Argentina'}
 };
 
 function fetchLiveScores() {
