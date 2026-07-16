@@ -299,7 +299,10 @@ var MATCH_LOOKUP = {
   100: {home:'Argentina',  away:'Switzerland'},
   // ── SEMI-FINALS ─────────────────────────────────────────────
   101: {home:'France',  away:'Spain'},
-  102: {home:'England', away:'Argentina'}
+  102: {home:'England', away:'Argentina'},
+  // ── THIRD PLACE & FINAL ──────────────────────────────────────
+  103: {home:'France',  away:'England'},
+  104: {home:'Spain',   away:'Argentina'}
 };
 
 function fetchLiveScores() {
